@@ -1,0 +1,161 @@
+    <!DOCTYPE html>
+    <html lang="uz">
+
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Maktab Market - Mobile</title>
+
+      <!-- Tailwind CSS -->
+      <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="app.js"></script>
+
+      <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .active-scale:active { transform: scale(0.95); }
+        .modal-enter { transform: translateY(100%); transition: transform 0.3s ease-out; }
+        .modal-show { transform: translateY(0); }
+        .fav-active { color: #eab308 !important; fill: #eab308; }
+      </style>
+    </head>
+
+
+<body class="flex bg-[#1f2937] justify-center items-center min-h-screen bg-gray-200 p-0 m-0 font-sans text-white">
+
+    <!-- Telefon konteyner -->
+    <div class="border-black overflow-hidden bg-[#1f2937] relative w-full  h-screen ">
+        <!-- Sensor joyi -->
+
+        <!-- LOGIN MODAL -->
+        <div id="loginModal" class="absolute inset-0 bg-black/95 z-[100] flex items-center justify-center p-6 hidden">
+          <div class="bg-gray-900 w-full p-6 rounded-3xl border border-white/10 text-center">
+            <h3 class="text-xl font-bold mb-4 text-yellow-500 lang-welcome">Xush kelibsiz!</h3>
+            <p class="text-gray-400 text-sm mb-4 lang-register_form">Davom etish uchun ismingiz va raqamingizni kiriting</p>
+            <input type="text" id="userName" placeholder="Ismingiz" class="w-full bg-gray-800 p-3 rounded-xl mb-3 outline-none border border-white/10 focus:border-yellow-500 text-white">
+            <input type="number" id="userPhone" placeholder="+998" class="w-full bg-gray-800 p-3 rounded-xl mb-6 outline-none border border-white/10 focus:border-yellow-500 text-white">
+            <button onclick="saveUser()" class="w-full bg-yellow-500 text-black py-3 rounded-xl font-bold active-scale lang-enter">Kirish</button>
+            <button onclick="logout()" class="w-full bg-red-500 text-white py-3 rounded-xl font-bold mt-3 active-scale">Chiqish</button>
+          </div>
+        </div>
+
+        <!-- Mahsulot batafsil modal -->
+        <div id="detailModal" class="absolute inset-0 bg-black/90 z-[60] hidden flex items-end justify-center">
+          <div class="bg-gray-900 w-full h-[70%] rounded-t-[2rem] p-6 modal-enter border-t border-white/10" id="detailContent">
+            <div class="w-12 h-1.5 bg-gray-600 rounded-full mx-auto mb-6" onclick="closeModal('detailModal', 'detailContent')"></div>
+            <img id="detailImg" class="w-full h-48 object-cover rounded-2xl mb-4">
+            <h3 id="detailName" class="text-2xl font-bold mb-2"></h3>
+            <p id="detailPrice" class="text-yellow-500 font-bold text-xl mb-4"></p>
+            <p id="detailDesc" class="text-gray-400 text-sm leading-relaxed mb-6">
+              Ushbu mahsulot yuqori sifatli materiallardan tayyorlangan bo'lib, o'quvchilar uchun juda qulay va chidamlidir.
+            </p>
+            <button id="detailAddToCart" class="w-full bg-yellow-500 text-black py-4 rounded-2xl font-bold active-scale lang-toCart">Savatga qo'shish</button>
+          </div>
+        </div>
+
+        <!-- Savat modal -->
+        <div id="cartModal" class="absolute inset-0 bg-black/95 z-40 hidden flex items-end justify-center">
+          <div class="bg-gray-900 w-full h-[85%] rounded-t-[2rem] p-6 modal-enter border-t border-white/10 overflow-y-auto" id="cartContent">
+            <div class="w-12 h-1.5 bg-gray-600 rounded-full mx-auto mb-6" onclick="closeModal('cartModal', 'cartContent')"></div>
+            <h3 class="text-2xl font-bold mb-6 flex items-center gap-2"><span class="lang-cartTitle">Savat</span></h3>
+            <div id="cartList" class="space-y-4"></div>
+            <div id="cartTotal" class="mt-6 pt-4 border-t border-white/10 text-xl font-bold text-right hidden">
+              <span class="lang-total">Jami</span>: <span class="text-yellow-500" id="totalPrice">0</span> so'm
+            </div>
+            <button id="cartActionButton" onclick="handleCartAction()" class="w-full bg-yellow-500 text-black py-4 rounded-2xl mt-8 font-bold active-scale lang-order">
+              Buyurtma berish
+            </button>
+          </div>
+        </div>
+
+        <!-- Sevimlilar modal -->
+        <div id="favModal" class="absolute inset-0 bg-black/90 z-40 hidden flex items-end justify-center">
+          <div class="bg-gray-900 w-full h-[85%] rounded-t-[2rem] p-6 modal-enter border-t border-white/10 overflow-y-auto" id="favContent">
+            <div class="w-12 h-1.5 bg-gray-600 rounded-full mx-auto mb-6" onclick="closeModal('favModal', 'favContent')"></div>
+            <h3 class="text-2xl font-bold mb-6 lang-favorites">Sevimlilar</h3>
+            <div id="favList" class="space-y-4"></div>
+          </div>
+        </div>
+
+        <!-- Buyurtmalar modal -->
+        <div id="ordersModal" class="absolute inset-0 bg-black/90 z-40 hidden flex items-end justify-center">
+          <div class="bg-gray-900 w-full h-[85%] rounded-t-[2rem] p-6 modal-enter border-t border-white/10 overflow-y-auto" id="ordersContent">
+            <div class="w-12 h-1.5 bg-gray-600 rounded-full mx-auto mb-6" onclick="closeModal('ordersModal', 'ordersContent')"></div>
+            <h3 class="text-2xl font-bold mb-6 lang-orders">Buyurtmalar</h3>
+            <div id="ordersList" class="space-y-4"></div>
+            <p id="noOrdersMsg" class="text-gray-400 text-center py-8 lang-no_orders">Buyurtmalarni yo'q</p>
+          </div>
+        </div>
+
+        <!-- Asosiy kontent -->
+
+        <!-- Bosh sahifa -->
+        <div class="p-4 pt-10 h-full overflow-y-auto no-scrollbar" id="mainContentScroll">
+
+          <div class="flex items-center justify-between mb-5">
+            <h2 class="text-2xl font-bold tracking-tight" id="mainLogo">Maktab Market</h2>
+            <div id="navArea" class="flex items-center">
+              <button id="userNavBtn" onclick="handleAuthClick()" class="flex items-center gap-2 text-gray-300 hover:text-yellow-400">
+                <span id="navUserLabel">Kirish</span>
+                <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Qidiruv va katalog -->
+          <div class="flex items-center gap-2 mb-6">
+            <button class="bg-yellow-500 text-black h-10 px-4 rounded-xl font-bold text-sm lang-katalog">Katalog</button>
+            <input id="searchInput" type="text" placeholder="Qidirish..." class="flex-1 h-10 px-4 rounded-xl text-gray-800 text-sm outline-none">
+          </div>
+
+          <!-- Tezkor menyu -->
+          <div class="flex items-center gap-4 text-[13px] font-medium overflow-x-auto whitespace-nowrap no-scrollbar mb-6 pb-2 border-b border-white/10 text-gray-300">
+            <span onclick="openModal('ordersModal', 'ordersContent')" class="cursor-pointer hover:text-yellow-400 lang-orders">Buyurtmalar</span>
+            <span onclick="openModal('favModal', 'favContent')" class="cursor-pointer hover:text-yellow-400 flex items-center gap-1">
+              <span class="lang-favorites">Sevimlilar</span> <span id="favCount" class="bg-yellow-500 text-black text-[10px] px-1.5 rounded-full hidden">0</span>
+            </span>
+            <span onclick="openModal('cartModal', 'cartContent')" class="cursor-pointer hover:text-yellow-400 flex items-center gap-1">
+              <span class="lang-cartTitle">Savat</span> <span id="cartCount" class="bg-yellow-500 text-black text-[10px] px-1.5 rounded-full hidden">0</span>
+            </span>
+
+            <!-- Til tanlash -->
+            <div class="flex gap-2 ml-auto">
+              <button id="langBtnUz" onclick="setLanguage('uz')" class="px-3 py-1 bg-yellow-500 text-black rounded-lg text-[12px] font-bold active-scale">O'z 🇺🇿</button>
+              <button id="langBtnRu" onclick="setLanguage('ru')" class="px-3 py-1 bg-white/10 text-white rounded-lg text-[12px] font-bold active-scale hover:bg-yellow-500 hover:text-black">Ру 🇷🇺</button>
+            </div>
+          </div>
+
+          <!-- Kategoriya tugmalari -->
+  <div class="flex gap-2 mb-6 overflow-x-auto no-scrollbar"> 
+    <button id="#1" onclick="filterCategory('all')" class="category px-4 py-1.5 bg-yellow-500 text-black font-bold rounded-full text-[12px]">Hammasi</button>
+    <button onclick="filterCategory('all')" class="category px-4 py-1.5 bg-yellow-500 text-black font-bold rounded-full text-[12px]">Hammasi</button>
+    <button onclick="filterCategory('Kiyimlar')" class="category px-4 py-1.5 bg-yellow-500 text-black font-bold rounded-full text-[12px]">Kiyimlar</button>
+    <button onclick="filterCategory('sumka')" class="category px-4 py-1.5 bg-yellow-500 text-black font-bold rounded-full text-[12px]">Sumkalar</button>
+    <button onclick="filterCategory('Kitoblar')" class="category px-4 py-1.5 bg-yellow-500 text-black font-bold rounded-full text-[12px]">Kitoblar</button>
+    <button onclick="filterCategory('Daftarlar')" class="category px-4 py-1.5 bg-yellow-500 text-black font-bold rounded-full text-[12px]">Daftarlar</button>
+    <button onclick="filterCategory('Ruchkalar')" class="category px-4 py-1.5 bg-yellow-500 text-black font-bold rounded-full text-[12px]">Ruchkalar</button>
+  </div>
+
+          <!-- Mahsulotlar grid -->
+          <div class="grid grid-cols-2 gap-3 mb-10" id="productGrid">
+            <!-- Mahsulotlar JS orqali qo'shiladi -->
+          </div>
+  
+          <!-- Feedback -->
+          <div id="#1" class="mb-10 p-5 bg-gray-800/40 rounded-[2rem] border border-white/5">
+            <h3 class="text-base font-bold text-yellow-500 mb-3 lang-feedback-title">Fikringizni qoldiring</h3>
+            <textarea id="userFeedback" class="w-full bg-gray-900 border border-white/10 rounded-2xl p-3 text-sm text-white outline-none focus:border-yellow-500 h-24 mb-3 resize-none" placeholder="Xabaringizni bu yerga yozing..."></textarea>
+            <button onclick="sendFeedback()" class="w-full bg-white text-black py-3 rounded-xl font-bold active-scale flex items-center justify-center gap-2">
+              <span class="lang-send">Yuborish</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      
+    </body>
+    </html>
